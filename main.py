@@ -164,7 +164,8 @@ def main() -> None:
     _step(f"Lade YouTube-Daten für {len(keywords_list)} Keywords ...")
     try:
         youtube_data = get_youtube_data(keywords_with_cats)
-        source = "API" if os.getenv("YOUTUBE_API_KEY") else "Fallback-Schätzwerte"
+        from scrapers.youtube_api import YOUTUBE_API_AVAILABLE
+        source = "API" if (YOUTUBE_API_AVAILABLE and os.getenv("YOUTUBE_API_KEY")) else "Fallback-Schätzwerte"
         _ok(f"YouTube-Daten geladen ({source})")
     except Exception as e:
         _warn(f"YouTube-Daten Fehler: {e} – nutze Defaults")
