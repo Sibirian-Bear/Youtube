@@ -1,0 +1,7 @@
+pytrends>=4.9.2
+beautifulsoup4>=4.12.0
+requests>=2.31.0
+google-api-python-client>=2.100.0
+pandas>=2.0.0
+colorama>=0.4.6
+lxml>=4.9.0
