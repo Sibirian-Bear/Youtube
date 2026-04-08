@@ -167,7 +167,10 @@ def capture_all_screens(sections: list, output_dir: Path) -> dict[str, Path]:
     for section in sections:
         for i, screen in enumerate(section.screens):
             key = f"{section.title[:20]}_{i:02d}"
-            filename = f"screen_{key.lower().replace(' ', '_')}.png"
+            # Alle ungültigen Zeichen für Dateinamen entfernen (/, \, :, #, *, ?, etc.)
+            safe_key = re.sub(r'[^\w\-]', '_', key.lower())
+            safe_key = re.sub(r'_+', '_', safe_key).strip('_')
+            filename = f"screen_{safe_key}.png"
             path = capture_for_annotation(screen, output_dir, filename)
             results[key] = path
 

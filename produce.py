@@ -14,6 +14,7 @@ Verwendung:
 """
 import argparse
 import logging
+import re
 import sys
 from datetime import date
 from pathlib import Path
@@ -32,6 +33,12 @@ logging.getLogger("PIL").setLevel(logging.WARNING)
 logging.getLogger("playwright").setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
+
+
+def _safe_filename(text: str) -> str:
+    """Entfernt alle ungültigen Zeichen aus Dateinamen (/, \\, :, #, *, ?, etc.)"""
+    safe = re.sub(r'[^\w\-]', '_', text.lower())
+    return re.sub(r'_+', '_', safe).strip('_')
 
 
 def _step(n: int, total: int, msg: str) -> None:
@@ -77,23 +84,23 @@ def _select_visual(section, idx: int,
     2. Bewertungskarte (wenn rating_card vorhanden)
     3. Titelkarte
     """
+    safe_title = _safe_filename(section.title[:20])
+
     # Screenshot
     for i, _ in enumerate(section.screens):
-        key = f"{section.title[:20]}_{i:02d}"
-        fname = f"screen_{key.lower().replace(' ', '_')}.png"
+        key = f"{safe_title}_{i:02d}"
+        fname = f"screen_{key}.png"
         p = screenshots_dir / fname
         if p.exists():
             return p
 
     # Bewertungskarte
-    rating_fname = f"{idx:02d}_rating.png"
-    rp = graphics_dir / rating_fname
+    rp = graphics_dir / f"{idx:02d}_{safe_title}_rating.png"
     if rp.exists():
         return rp
 
     # Titelkarte
-    title_fname = f"{idx:02d}_title.png"
-    tp = graphics_dir / title_fname
+    tp = graphics_dir / f"{idx:02d}_{safe_title}_title.png"
     if tp.exists():
         return tp
 
@@ -184,7 +191,7 @@ def main() -> None:
             create_rating_card(
                 section.rating_card,
                 output_dir=graphics_dir,
-                filename=f"{i:02d}_rating.png",
+                filename=f"{i:02d}_{_safe_filename(title_clean)}_rating.png",
             )
 
         # Titelkarte (immer als Fallback)
@@ -192,7 +199,7 @@ def main() -> None:
             title=title_clean,
             subtitle=section.screens[0][:80] if section.screens else "",
             output_dir=graphics_dir,
-            filename=f"{i:02d}_title.png",
+            filename=f"{i:02d}_{_safe_filename(title_clean)}_title.png",
         )
 
     # Vergleichstabelle für Fazit-Sektion
